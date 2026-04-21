@@ -260,7 +260,7 @@
             const d = document.getElementById('g3-dog-anim'); 
             d.style.transform = `scale(1)`; 
             // 1. 初始狀態：顯示想著吃肉的狗狗
-            d.innerHTML = '<img src="img/dog_think.png" style="height: 100%; object-fit: contain;">';
+            d.innerHTML = '<img src="img/dog_hungry.png" style="height: 100%; object-fit: contain;">';
             
             const zh = document.getElementById('g3-zh'); const zy = document.getElementById('g3-zy');
             zh.innerHTML = ''; zy.innerHTML = '';
@@ -274,7 +274,7 @@
                     if(dr.classList.contains('matched')) return; 
                     dr.setPointerCapture(e.pointerId); sx = e.clientX; sy = e.clientY; 
                     // 2. 拖拉時：還是想著吃肉
-                    d.innerHTML = '<img src="img/dog_think.png" style="height: 100%; object-fit: contain;">'; 
+                    d.innerHTML = '<img src="img/dog_hungry.png" style="height: 100%; object-fit: contain;">'; 
                     dr.classList.add('dragging'); 
                 });
                 
@@ -309,7 +309,7 @@
                     else { 
                         playS('fail'); dr.style.transition = 'transform 0.3s'; dr.style.transform = 'translate(0, 0)'; 
                         // 5. 配對失敗：哭哭的狗狗
-                        d.innerHTML = '<img src="img/dog_cry.png" style="height: 100%; object-fit: contain;">'; 
+                        d.innerHTML = '<img src="img/dog_sad.png" style="height: 100%; object-fit: contain;">'; 
                         setTimeout(() => dr.style.transition = '', 300); 
                     }
                 }); zh.appendChild(dr);
