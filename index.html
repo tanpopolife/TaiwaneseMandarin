@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>蒲公英老師的華語小遊戲</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+        :root {
+            --bg-color: #FFF0F5; --primary-pink: #FFB6C1; --hover-pink: #FF69B4; --text-color: #5D4037;
+        }
+        * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft JhengHei', sans-serif; user-select: none; }
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        h1 { color: var(--hover-pink); font-size: clamp(1.5rem, 5vw, 2rem); margin-bottom: 30px; text-shadow: 2px 2px 0px #FFF; text-align: center; }
+        
+        .date-list { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; }
+        .date-btn {
+            background: #fff; border: 3px solid var(--primary-pink); padding: 20px;
+            font-size: 1.3rem; font-weight: bold; color: var(--hover-pink); text-decoration: none;
+            border-radius: 20px; cursor: pointer; box-shadow: 0 5px 0px var(--primary-pink);
+            display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s;
+        }
+        .date-btn:active { transform: translateY(5px); box-shadow: 0 0px 0px var(--primary-pink); }
+    </style>
+</head>
+<body>
+
+    <h1>🌼 蒲公英老師的華語小遊戲</h1>
+    <div id="loading-msg" style="color: var(--hover-pink); font-weight: bold; font-size: 1.2rem;">正在抓取最新課程資料...</div>
+    <div class="date-list" id="date-list-container"></div>
+
+    <script>
+        // ⚠️ 請在這裡貼上您「發布到網路」的 CSV 網址
+        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToo6n6I9jZ2cGU5P_zX6R-Vaybo8X83EmLTNCE1iQ7b-wubRxdZDc3gwV55hfGnh3o99Xt00lTmwyf/pub?output=csv"; 
+
+        async function fetchDates() {
+            try {
+                let csvText = "";
+                if(GOOGLE_SHEET_CSV_URL === "https://docs.google.com/spreadsheets/d/e/2PACX-1vToo6n6I9jZ2cGU5P_zX6R-Vaybo8X83EmLTNCE1iQ7b-wubRxdZDc3gwV55hfGnh3o99Xt00lTmwyf/pub?output=csv") {
+                    // 假資料測試用
+                    csvText = `日期,生詞,注音\n2026/04/21,學校,ㄒㄩㄝˊ ㄒㄧㄠˋ\n2026/04/28,蘋果,ㄆㄧㄥˊ ㄍㄨㄛˇ`;
+                } else {
+                    const res = await fetch(GOOGLE_SHEET_CSV_URL);
+                    csvText = await res.text();
+                }
+
+                const rows = csvText.split('\n').map(row => row.trim()).filter(row => row);
+                const headers = rows[0].split(',');
+                const dateIdx = headers.indexOf('日期') > -1 ? headers.indexOf('日期') : 0;
+                
+                let uniqueDates = new Set();
+                for (let i = 1; i < rows.length; i++) {
+                    const cols = rows[i].split(',');
+                    if (cols.length > dateIdx && cols[dateIdx]) uniqueDates.add(cols[dateIdx]);
+                }
+
+                document.getElementById('loading-msg').style.display = 'none';
+                const container = document.getElementById('date-list-container');
+                
+                uniqueDates.forEach(date => {
+                    const dateParts = date.split('/'); 
+                    let fileName = '#';
+                    if(dateParts.length === 3) fileName = `game_${dateParts[1]}${dateParts[2]}.html`;
+
+                    const link = document.createElement('a');
+                    link.className = 'date-btn';
+                    link.href = fileName;
+                    link.innerHTML = `<span>📅 ${date}</span><span>前往挑戰 ➡️</span>`;
+                    container.appendChild(link);
+                });
+
+            } catch (error) {
+                document.getElementById('loading-msg').innerText = "載入失敗，請確認 Google Sheet 設定。";
+            }
+        }
+        window.onload = fetchDates;
+    </script>
+</body>
+</html>
