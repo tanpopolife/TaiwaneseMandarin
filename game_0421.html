@@ -256,20 +256,37 @@
         // ================== Game 3：餵食小狗 (數學座標偵測) ==================
         let dogSize = 1;
         function initG3(v) {
-            dogSize = 1; const d = document.getElementById('g3-dog-anim'); d.style.transform = `scale(1)`; d.innerText = '🐶';
+            dogSize = 1; 
+            const d = document.getElementById('g3-dog-anim'); 
+            d.style.transform = `scale(1)`; 
+            // 1. 初始狀態：顯示想著吃肉的狗狗
+            d.innerHTML = '<img src="img/dog_think.png" style="height: 100%; object-fit: contain;">';
+            
             const zh = document.getElementById('g3-zh'); const zy = document.getElementById('g3-zy');
             zh.innerHTML = ''; zy.innerHTML = '';
+            
             shuffle([...v]).forEach(x => { let dz = document.createElement('div'); dz.className = 'dropzone'; dz.innerText = x.zy; dz.dataset.val = x.zh; zy.appendChild(dz); });
             shuffle([...v]).forEach(x => {
                 let dr = document.createElement('div'); dr.className = 'card draggable'; dr.innerText = x.zh; dr.dataset.val = x.zh;
                 let sx=0, sy=0;
-                dr.addEventListener('pointerdown', (e) => { if(dr.classList.contains('matched')) return; dr.setPointerCapture(e.pointerId); sx = e.clientX; sy = e.clientY; d.innerText = '🐶'; dr.classList.add('dragging'); });
-                dr.addEventListener('pointermove', (e) => { if(!dr.hasPointerCapture(e.pointerId)) return; dr.style.transform = `translate(${e.clientX - sx}px, ${e.clientY - sy}px) scale(1.05)`; });
+                
+                dr.addEventListener('pointerdown', (e) => { 
+                    if(dr.classList.contains('matched')) return; 
+                    dr.setPointerCapture(e.pointerId); sx = e.clientX; sy = e.clientY; 
+                    // 2. 拖拉時：還是想著吃肉
+                    d.innerHTML = '<img src="img/dog_think.png" style="height: 100%; object-fit: contain;">'; 
+                    dr.classList.add('dragging'); 
+                });
+                
+                dr.addEventListener('pointermove', (e) => { 
+                    if(!dr.hasPointerCapture(e.pointerId)) return; 
+                    dr.style.transform = `translate(${e.clientX - sx}px, ${e.clientY - sy}px) scale(1.05)`; 
+                });
+                
                 dr.addEventListener('pointerup', (e) => {
                     if(dr.classList.contains('matched') || !dr.hasPointerCapture(e.pointerId)) return;
                     dr.releasePointerCapture(e.pointerId); dr.classList.remove('dragging');
                     
-                    // 【數學座標偵測】
                     let dz = null;
                     document.querySelectorAll('#g3-zy .dropzone').forEach(drop => {
                         let r = drop.getBoundingClientRect();
@@ -278,9 +295,23 @@
 
                     if (dz && !dz.classList.contains('matched') && dz.dataset.val === dr.dataset.val) { 
                         playS('success'); dr.classList.add('matched'); dz.classList.add('matched'); dr.style.transform = 'translate(0, 0)'; 
-                        d.innerText = '🐶🍖'; setTimeout(() => { dogSize += 0.1; d.innerText = '🐕'; d.style.transform = `scale(${dogSize})`; }, 400); 
+                        
+                        // 3. 配對成功：正在吃肉
+                        d.innerHTML = '<img src="img/dog_eat.png" style="height: 100%; object-fit: contain;">'; 
+                        
+                        setTimeout(() => { 
+                            dogSize += 0.1; 
+                            // 4. 吃完變大：滿足的狗狗
+                            d.innerHTML = '<img src="img/dog_full.png" style="height: 100%; object-fit: contain;">'; 
+                            d.style.transform = `scale(${dogSize})`; 
+                        }, 400); 
                     } 
-                    else { playS('fail'); dr.style.transition = 'transform 0.3s'; dr.style.transform = 'translate(0, 0)'; d.innerText = '😭'; setTimeout(() => dr.style.transition = '', 300); }
+                    else { 
+                        playS('fail'); dr.style.transition = 'transform 0.3s'; dr.style.transform = 'translate(0, 0)'; 
+                        // 5. 配對失敗：哭哭的狗狗
+                        d.innerHTML = '<img src="img/dog_cry.png" style="height: 100%; object-fit: contain;">'; 
+                        setTimeout(() => dr.style.transition = '', 300); 
+                    }
                 }); zh.appendChild(dr);
             });
         }
